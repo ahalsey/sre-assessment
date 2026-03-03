@@ -19,29 +19,26 @@ env:
 
 jobs:
   # --------------------------------------------------------------------------
-  # Detect which environments changed
+  # Detect which env changed
   # --------------------------------------------------------------------------
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
-      environments: ${{ steps.changes.outputs.environments }}
+      env: ${{ steps.changes.outputs.env }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Detect changed environments
+      - name: Detect changed env
         id: changes
         run: |
           # Default to dev if root modules changed
           ENVS="[]"
           CHANGED=$(git diff --name-only origin/main...HEAD 2>/dev/null || echo "")
 
-          if echo "$CHANGED" | grep -qE "^environments/dev/|^modules/|^[^/]+\.tf$"; then
+          if echo "$CHANGED" | grep -qE "^env/dev/|^modules/|^[^/]+\.tf$"; then
             ENVS=$(echo "$ENVS" | jq '. += ["dev"]')
           fi
-          if echo "$CHANGED" | grep -qE "^environments/staging/"; then
-            ENVS=$(echo "$ENVS" | jq '. += ["staging"]')
-          fi
-          if echo "$CHANGED" | grep -qE "^environments/prod/"; then
+          if echo "$CHANGED" | grep -qE "^env/prod/"; then
             ENVS=$(echo "$ENVS" | jq '. += ["prod"]')
           fi
 
@@ -50,7 +47,7 @@ jobs:
             ENVS='["dev"]'
           fi
 
-          echo "environments=$ENVS" >> "$GITHUB_OUTPUT"
+          echo "env=$ENVS" >> "$GITHUB_OUTPUT"
 
   # --------------------------------------------------------------------------
   # Lint & Security
@@ -84,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        environment: ${{ fromJson(needs.detect-changes.outputs.environments) }}
+        environment: ${{ fromJson(needs.detect-changes.outputs.env) }}
       fail-fast: false
 
     steps:
@@ -101,7 +98,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform Init
-        working-directory: environments/${{ matrix.environment }}
+        working-directory: env/${{ matrix.environment }}
         run: |
           terraform init \
             -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
@@ -111,12 +108,12 @@ jobs:
             -backend-config="encrypt=true"
 
       - name: Terraform Validate
-        working-directory: environments/${{ matrix.environment }}
+        working-directory: env/${{ matrix.environment }}
         run: terraform validate
 
       - name: Terraform Plan
         id: plan
-        working-directory: environments/${{ matrix.environment }}
+        working-directory: env/${{ matrix.environment }}
         run: |
           terraform plan -no-color -out=tfplan 2>&1 | tee plan-output.txt
         continue-on-error: true
@@ -127,7 +124,7 @@ jobs:
           script: |
             const fs = require('fs');
             const plan = fs.readFileSync(
-              `environments/${{ matrix.environment }}/plan-output.txt`, 'utf8'
+              `env/${{ matrix.environment }}/plan-output.txt`, 'utf8'
             );
             const truncated = plan.length > 60000
               ? plan.substring(0, 60000) + '\n\n... (truncated)'
