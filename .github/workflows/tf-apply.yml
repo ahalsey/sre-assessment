@@ -1,0 +1,75 @@
+name: "Terraform Apply"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**.tf"
+      - "**.tfvars"
+      - ".github/workflows/terraform-apply.yml"
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      auto_approve:
+        description: "Skip approval (dev only)"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  TF_VERSION: "1.7.0"
+  AWS_REGION: "us-east-1"
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'dev' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set environment
+        id: env
+        run: |
+          ENV="${{ github.event.inputs.environment || 'dev' }}"
+          echo "target=$ENV" >> "$GITHUB_OUTPUT"
+
+      - name: Terraform Init
+        working-directory: environments/${{ steps.env.outputs.target }}
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=${{ steps.env.outputs.target }}/terraform.tfstate" \
+            -backend-config="region=${{ env.AWS_REGION }}" \
+            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}" \
+            -backend-config="encrypt=true"
+
+      - name: Terraform Plan
+        working-directory: environments/${{ steps.env.outputs.target }}
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        working-directory: environments/${{ steps.env.outputs.target }}
+        run: terraform apply -auto-approve tfplan

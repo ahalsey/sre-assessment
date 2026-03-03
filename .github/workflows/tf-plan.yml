@@ -1,0 +1,151 @@
+name: "Terraform Plan"
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "**.tf"
+      - "**.tfvars"
+      - ".github/workflows/terraform-plan.yml"
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write # For OIDC auth with AWS
+
+env:
+  TF_VERSION: "1.7.0"
+  AWS_REGION: "us-east-1"
+
+jobs:
+  # --------------------------------------------------------------------------
+  # Detect which environments changed
+  # --------------------------------------------------------------------------
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      environments: ${{ steps.changes.outputs.environments }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect changed environments
+        id: changes
+        run: |
+          # Default to dev if root modules changed
+          ENVS="[]"
+          CHANGED=$(git diff --name-only origin/main...HEAD 2>/dev/null || echo "")
+
+          if echo "$CHANGED" | grep -qE "^environments/dev/|^modules/|^[^/]+\.tf$"; then
+            ENVS=$(echo "$ENVS" | jq '. += ["dev"]')
+          fi
+          if echo "$CHANGED" | grep -qE "^environments/staging/"; then
+            ENVS=$(echo "$ENVS" | jq '. += ["staging"]')
+          fi
+          if echo "$CHANGED" | grep -qE "^environments/prod/"; then
+            ENVS=$(echo "$ENVS" | jq '. += ["prod"]')
+          fi
+
+          # If no specific env detected, default to dev
+          if [ "$ENVS" = "[]" ]; then
+            ENVS='["dev"]'
+          fi
+
+          echo "environments=$ENVS" >> "$GITHUB_OUTPUT"
+
+  # --------------------------------------------------------------------------
+  # Lint & Security
+  # --------------------------------------------------------------------------
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform fmt check
+        run: terraform fmt -check -recursive
+
+      - name: Install tfsec
+        run: |
+          curl -sLo tfsec https://github.com/aquasecurity/tfsec/releases/latest/download/tfsec-linux-amd64
+          chmod +x tfsec
+          sudo mv tfsec /usr/local/bin/
+
+      - name: Run tfsec
+        run: tfsec . --format lovely --minimum-severity MEDIUM
+
+  # --------------------------------------------------------------------------
+  # Plan per environment
+  # --------------------------------------------------------------------------
+  plan:
+    needs: [detect-changes, lint]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: ${{ fromJson(needs.detect-changes.outputs.environments) }}
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform Init
+        working-directory: environments/${{ matrix.environment }}
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=${{ matrix.environment }}/terraform.tfstate" \
+            -backend-config="region=${{ env.AWS_REGION }}" \
+            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}" \
+            -backend-config="encrypt=true"
+
+      - name: Terraform Validate
+        working-directory: environments/${{ matrix.environment }}
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        working-directory: environments/${{ matrix.environment }}
+        run: |
+          terraform plan -no-color -out=tfplan 2>&1 | tee plan-output.txt
+        continue-on-error: true
+
+      - name: Comment plan on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const plan = fs.readFileSync(
+              `environments/${{ matrix.environment }}/plan-output.txt`, 'utf8'
+            );
+            const truncated = plan.length > 60000
+              ? plan.substring(0, 60000) + '\n\n... (truncated)'
+              : plan;
+
+            const body = `### Terraform Plan: \`${{ matrix.environment }}\`
+            \`\`\`
+            ${truncated}
+            \`\`\`
+            *Triggered by @${{ github.actor }} in ${{ github.event.pull_request.head.sha }}*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      - name: Fail if plan failed
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
