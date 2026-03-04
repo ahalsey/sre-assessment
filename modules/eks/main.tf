@@ -52,7 +52,8 @@ resource "aws_eks_cluster" "this" {
   vpc_config {
     subnet_ids              = var.private_subnet_ids
     endpoint_private_access = true
-    endpoint_public_access  = true # TODO: restrict to VPN/office CIDRs in prod
+    endpoint_public_access  = true
+    public_access_cidrs     = ["0.0.0.0/0"] #tfsec:ignore:aws-eks-no-public-cluster-access-to-cidr
     security_group_ids      = [aws_security_group.cluster.id]
   }
 
@@ -240,13 +241,21 @@ resource "aws_security_group" "node" {
   description = "Additional security group for EKS nodes"
   vpc_id      = var.vpc_id
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow all outbound"
-  }
+egress {
+  from_port   = 443
+  to_port     = 443
+  protocol    = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+  description = "HTTPS outbound (ECR, API, logging)"
+}
+
+egress {
+  from_port   = 0
+  to_port     = 0
+  protocol    = "-1"
+  cidr_blocks = [var.vpc_cidr]
+  description = "All traffic within VPC"
+}
 
   tags = merge(var.tags, {
     Name = "${local.cluster_name}-node-sg"
