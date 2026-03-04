@@ -3,6 +3,6 @@ locals {
     Project     = var.project_name
     Environment = var.environment
     ManagedBy   = "terraform"
-    Repository  = "terraform-aws-eks-platform"
+    Repository  = "sre-assessment"
   }
 }

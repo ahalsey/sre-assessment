@@ -1,7 +1,7 @@
 variable "project_name" {
   description = "Project identifier used in resource naming and tagging"
   type        = string
-  default     = "eks-platform"
+  default     = "platform-sre-demo"
 }
 
 variable "environment" {

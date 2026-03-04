@@ -6,7 +6,7 @@ on:
     paths:
       - "**.tf"
       - "**.tfvars"
-      - ".github/workflows/terraform-plan.yml"
+      - ".github/workflows/tf-plan.yml"
 
 permissions:
   contents: read

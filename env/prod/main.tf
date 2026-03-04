@@ -2,7 +2,7 @@ terraform {
   required_version = ">= 1.5.0"
 
   backend "s3" {
-    # bucket         = "your-terraform-state-bucket"
+    # bucket         = "prod-platform-sre-demo-tfstate"
     # key            = "prod/terraform.tfstate"
     # region         = "us-east-1"
     # dynamodb_table = "terraform-state-lock"
@@ -15,7 +15,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Project     = "eks-platform"
+      Project     = "platform-sre-demo"
       Environment = "prod"
       ManagedBy   = "terraform"
     }
@@ -25,7 +25,7 @@ provider "aws" {
 module "platform" {
   source = "../../"
 
-  project_name       = "eks-platform"
+  project_name       = "platform-sre-demo"
   environment        = "prod"
   aws_region         = var.aws_region
   vpc_cidr           = "10.0.0.0/16"

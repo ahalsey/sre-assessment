@@ -3,7 +3,7 @@ terraform {
 
   backend "s3" {
     # Configure via -backend-config or environment variables:
-    #   bucket         = "your-terraform-state-bucket"
+    #   bucket         = "dev-platform-sre-demo-tfstate"
     #   key            = "dev/terraform.tfstate"
     #   region         = "us-east-1"
     #   dynamodb_table = "terraform-state-lock"
@@ -16,7 +16,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Project     = "eks-platform"
+      Project     = "platform-sre-demo"
       Environment = "dev"
       ManagedBy   = "terraform"
     }
@@ -26,7 +26,7 @@ provider "aws" {
 module "platform" {
   source = "../../"
 
-  project_name       = "eks-platform"
+  project_name       = "platform-sre-demo"
   environment        = "dev"
   aws_region         = var.aws_region
   vpc_cidr           = "10.0.0.0/16"

@@ -6,7 +6,7 @@ on:
     paths:
       - "**.tf"
       - "**.tfvars"
-      - ".github/workflows/terraform-apply.yml"
+      - ".github/workflows/tf-apply.yml"
 
   workflow_dispatch:
     inputs:
@@ -16,7 +16,6 @@ on:
         type: choice
         options:
           - dev
-          - staging
           - prod
       auto_approve:
         description: "Skip approval (dev only)"
