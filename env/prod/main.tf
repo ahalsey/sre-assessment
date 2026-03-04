@@ -2,11 +2,12 @@ terraform {
   required_version = ">= 1.5.0"
 
   backend "s3" {
-    # bucket         = "prod-platform-sre-demo-tfstate"
-    # key            = "prod/terraform.tfstate"
-    # region         = "us-east-1"
-    # dynamodb_table = "terraform-state-lock"
-    # encrypt        = true
+    #   Configured via environment variables
+    #   bucket         = "platform-sre-demo-tfstate"
+    #   key            = "prod/terraform.tfstate"
+    #   region         = "us-east-1"
+    #   dynamodb_table = "terraform-state-lock"
+    #   encrypt        = true
   }
 }
 

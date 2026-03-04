@@ -2,8 +2,8 @@ terraform {
   required_version = ">= 1.5.0"
 
   backend "s3" {
-    # Configure via -backend-config or environment variables:
-    #   bucket         = "dev-platform-sre-demo-tfstate"
+    #   Configured via environment variables
+    #   bucket         = "platform-sre-demo-tfstate"
     #   key            = "dev/terraform.tfstate"
     #   region         = "us-east-1"
     #   dynamodb_table = "terraform-state-lock"

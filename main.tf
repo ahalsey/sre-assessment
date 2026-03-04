@@ -58,17 +58,17 @@ module "eks" {
 module "rds" {
   source = "./modules/rds"
 
-  project_name       = var.project_name
-  environment        = var.environment
-  vpc_id             = module.vpc.vpc_id
-  database_subnet_ids = module.vpc.database_subnet_ids
+  project_name               = var.project_name
+  environment                = var.environment
+  vpc_id                     = module.vpc.vpc_id
+  database_subnet_ids        = module.vpc.database_subnet_ids
   allowed_security_group_ids = [module.eks.node_security_group_id]
 
-  instance_class     = var.rds_instance_class
-  allocated_storage  = var.rds_allocated_storage
-  db_name            = var.rds_db_name
-  db_username        = var.rds_db_username
-  multi_az           = var.rds_multi_az
+  instance_class    = var.rds_instance_class
+  allocated_storage = var.rds_allocated_storage
+  db_name           = var.rds_db_name
+  db_username       = var.rds_db_username
+  multi_az          = var.rds_multi_az
 
   tags = local.common_tags
 }
@@ -85,10 +85,10 @@ module "app" {
   container_port  = var.app_container_port
   replicas        = var.app_replicas
 
-  db_host     = module.rds.endpoint
-  db_port     = module.rds.port
-  db_name     = module.rds.db_name
-  db_username = module.rds.db_username
+  db_host       = module.rds.endpoint
+  db_port       = module.rds.port
+  db_name       = module.rds.db_name
+  db_username   = module.rds.db_username
   db_secret_arn = module.rds.secret_arn
 
   depends_on = [module.eks, module.rds]
@@ -99,9 +99,9 @@ module "app" {
 module "observability" {
   source = "./modules/observability"
 
-  project_name   = var.project_name
-  environment    = var.environment
-  cluster_name   = module.eks.cluster_name
+  project_name    = var.project_name
+  environment     = var.environment
+  cluster_name    = module.eks.cluster_name
   sns_alert_email = var.alert_email
 
   tags = local.common_tags
