@@ -211,7 +211,7 @@ resource "aws_iam_role" "flow_logs" {
   tags = var.tags
 }
 
-resource "aws_iam_role_policy" "flow_logs" {
+resource "aws_iam_role_policy" "flow_logs" { #tfsec:ignore:aws-iam-no-policy-wildcards scoped to specific log group
   name = "flow-logs-policy"
   role = aws_iam_role.flow_logs.id
 
@@ -225,7 +225,7 @@ resource "aws_iam_role_policy" "flow_logs" {
         "logs:DescribeLogStreams"
       ]
       Effect   = "Allow"
-      Resource = "${aws_cloudwatch_log_group.flow_logs.arn}:*" #tfsec:ignore:aws-iam-no-policy-wildcards -- scoped to specific log group
+      Resource = "${aws_cloudwatch_log_group.flow_logs.arn}:*"
     }]
   })
 }
