@@ -45,8 +45,8 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
   tags = merge(var.tags, {
-    Name                                = "${local.name_prefix}-public-${var.availability_zones[count.index]}"
-    "kubernetes.io/role/elb"            = "1"
+    Name                                         = "${local.name_prefix}-public-${var.availability_zones[count.index]}"
+    "kubernetes.io/role/elb"                     = "1"
     "kubernetes.io/cluster/${local.name_prefix}" = "shared"
   })
 }
@@ -60,8 +60,8 @@ resource "aws_subnet" "private" {
 
   tags = merge(var.tags, {
     Name                                         = "${local.name_prefix}-private-${var.availability_zones[count.index]}"
-    "kubernetes.io/role/internal-elb"             = "1"
-    "kubernetes.io/cluster/${local.name_prefix}"  = "shared"
+    "kubernetes.io/role/internal-elb"            = "1"
+    "kubernetes.io/cluster/${local.name_prefix}" = "shared"
   })
 }
 
