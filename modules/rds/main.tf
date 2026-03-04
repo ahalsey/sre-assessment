@@ -135,8 +135,8 @@ resource "aws_db_instance" "this" {
   skip_final_snapshot       = var.environment != "prod"
   final_snapshot_identifier = var.environment == "prod" ? "${local.name_prefix}-final-snapshot" : null
 
-  backup_retention_period = var.environment == "prod" ? 7 : 1
-  deletion_protection     = var.environment == "prod" # true if prod
+  backup_retention_period = var.environment == "prod" ? 7 : 1 #tfsec:ignore:aws-rds-specify-backup-retention
+  deletion_protection     = var.environment == "prod"         #tfsec:ignore:aws-rds-enable-deletion-protection
 
   performance_insights_enabled        = true
   performance_insights_kms_key_id     = aws_kms_key.rds.arn

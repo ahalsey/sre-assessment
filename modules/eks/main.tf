@@ -245,7 +245,7 @@ resource "aws_security_group" "node" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:aws-ec2-no-public-egress-sgr ECR, STS, CloudWatch
     description = "HTTPS outbound (ECR, API, logging)"
   }
 
@@ -253,7 +253,7 @@ resource "aws_security_group" "node" {
     from_port   = 53
     to_port     = 53
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:aws-ec2-no-public-egress-sgr DNS resolution
     description = "DNS TCP"
   }
 
@@ -261,7 +261,7 @@ resource "aws_security_group" "node" {
     from_port   = 53
     to_port     = 53
     protocol    = "udp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:aws-ec2-no-public-egress-sgr DNS resolution
     description = "DNS UDP"
   }
 
