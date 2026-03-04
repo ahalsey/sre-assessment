@@ -54,7 +54,7 @@ variable "vpc_cidr" {
 variable "public_access_cidrs" {
   description = "CIDRs allowed to reach the EKS API endpoint"
   type        = list(string)
-  default     = ["0.0.0.0/0"] 
+  default     = ["0.0.0.0/0"]
 }
 
 variable "tags" {

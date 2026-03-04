@@ -241,21 +241,21 @@ resource "aws_security_group" "node" {
   description = "Additional security group for EKS nodes"
   vpc_id      = var.vpc_id
 
-egress {
-  from_port   = 443
-  to_port     = 443
-  protocol    = "tcp"
-  cidr_blocks = ["0.0.0.0/0"]
-  description = "HTTPS outbound (ECR, API, logging)"
-}
+  egress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTPS outbound (ECR, API, logging)"
+  }
 
-egress {
-  from_port   = 0
-  to_port     = 0
-  protocol    = "-1"
-  cidr_blocks = [var.vpc_cidr]
-  description = "All traffic within VPC"
-}
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [var.vpc_cidr]
+    description = "All traffic within VPC"
+  }
 
   tags = merge(var.tags, {
     Name = "${local.cluster_name}-node-sg"
