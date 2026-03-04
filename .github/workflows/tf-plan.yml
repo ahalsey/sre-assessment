@@ -18,9 +18,7 @@ env:
   AWS_REGION: "us-east-1"
 
 jobs:
-  # --------------------------------------------------------------------------
   # Detect which env changed
-  # --------------------------------------------------------------------------
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
