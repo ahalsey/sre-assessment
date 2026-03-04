@@ -136,11 +136,13 @@ resource "aws_db_instance" "this" {
   final_snapshot_identifier = var.environment == "prod" ? "${local.name_prefix}-final-snapshot" : null
 
   backup_retention_period = var.environment == "prod" ? 7 : 1
-  deletion_protection     = var.environment == "prod"
+  deletion_protection     = var.environment == "prod" # true if prod
 
-  performance_insights_enabled = true
-  monitoring_interval          = 60
-  monitoring_role_arn          = aws_iam_role.rds_monitoring.arn
+  performance_insights_enabled        = true
+  performance_insights_kms_key_id     = aws_kms_key.rds.arn
+  iam_database_authentication_enabled = true
+  monitoring_interval                 = 60
+  monitoring_role_arn                 = aws_iam_role.rds_monitoring.arn
 
   tags = var.tags
 }

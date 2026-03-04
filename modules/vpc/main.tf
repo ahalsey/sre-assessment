@@ -42,7 +42,7 @@ resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.this.id
   cidr_block              = cidrsubnet(var.vpc_cidr, 8, count.index)
   availability_zone       = var.availability_zones[count.index]
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = true #tfsec:ignore:aws-ec2-no-public-ip-subnet -- public subnets require public IPs for NAT/ALB
 
   tags = merge(var.tags, {
     Name                                         = "${local.name_prefix}-public-${var.availability_zones[count.index]}"
@@ -219,14 +219,13 @@ resource "aws_iam_role_policy" "flow_logs" {
     Version = "2012-10-17"
     Statement = [{
       Action = [
-        "logs:CreateLogGroup",
         "logs:CreateLogStream",
         "logs:PutLogEvents",
         "logs:DescribeLogGroups",
         "logs:DescribeLogStreams"
       ]
       Effect   = "Allow"
-      Resource = "*"
+      Resource = "${aws_cloudwatch_log_group.flow_logs.arn}:*"
     }]
   })
 }
