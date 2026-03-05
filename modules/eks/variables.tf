@@ -61,3 +61,9 @@ variable "tags" {
   type    = map(string)
   default = {}
 }
+
+variable "install_lb_controller" {
+  description = "Whether to install the AWS Load Balancer Controller"
+  type        = bool
+  default     = false
+}

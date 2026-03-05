@@ -50,6 +50,7 @@ module "eks" {
   node_max_size         = var.eks_node_max_size
   node_disk_size        = var.eks_node_disk_size
   vpc_cidr              = module.vpc.vpc_cidr
+  install_lb_controller = var.install_lb_controller
 
   tags = local.common_tags
 }

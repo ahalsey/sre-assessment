@@ -325,6 +325,7 @@ resource "aws_iam_role_policy_attachment" "lb_controller" {
 }
 
 resource "helm_release" "lb_controller" {
+  count = var.install_lb_controller ? 1 : 0
   name       = "aws-load-balancer-controller"
   namespace  = "kube-system"
   repository = "https://aws.github.io/eks-charts"
