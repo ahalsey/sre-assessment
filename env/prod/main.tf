@@ -69,8 +69,12 @@ output "app_url" {
   value = module.platform.app_service_url
 }
 
+data "aws_eks_cluster" "this" {
+  name = "platform-sre-demo-prod-eks"
+}
+
 data "aws_eks_cluster_auth" "this" {
-  name = module.platform.eks_cluster_name
+  name = "platform-sre-demo-prod-eks"
 }
 
 provider "kubernetes" {

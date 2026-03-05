@@ -26,6 +26,7 @@ provider "aws" {
 module "platform" {
   source = "../../"
 
+
   project_name       = "platform-sre-demo"
   environment        = "dev"
   aws_region         = var.aws_region
@@ -70,11 +71,11 @@ output "app_url" {
 }
 
 data "aws_eks_cluster" "this" {
-  name = module.platform.eks_cluster_name
+  name = "platform-sre-demo-dev-eks"
 }
 
 data "aws_eks_cluster_auth" "this" {
-  name = module.platform.eks_cluster_name
+  name = "platform-sre-demo-dev-eks"
 }
 
 provider "kubernetes" {
