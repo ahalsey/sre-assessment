@@ -19,14 +19,24 @@ resource "aws_cloudwatch_log_group" "eks" {
   tags = var.tags
 }
 
+# KMS key for SNS topic encryption
+resource "aws_kms_key" "sns" {
+  description             = "KMS key for SNS topic encryption"
+  deletion_window_in_days = 7
+  enable_key_rotation     = true
+  tags                    = var.tags
+}
+
 # ---------------------------------------------------------------------------
 # SNS Topic for alerts
 # ---------------------------------------------------------------------------
-resource "aws_sns_topic" "alerts" {
-  name = "${local.name_prefix}-alerts"
 
-  tags = var.tags
+resource "aws_sns_topic" "alerts" {
+  name              = "${local.name_prefix}-alerts"
+  kms_master_key_id = aws_kms_key.sns.id
+  tags              = var.tags
 }
+
 
 resource "aws_sns_topic_subscription" "email" {
   count = var.sns_alert_email != "" ? 1 : 0

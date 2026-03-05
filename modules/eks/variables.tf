@@ -46,6 +46,17 @@ variable "node_disk_size" {
   default = 20
 }
 
+variable "vpc_cidr" {
+  description = "VPC CIDR for internal egress rules"
+  type        = string
+}
+
+variable "public_access_cidrs" {
+  description = "CIDRs allowed to reach the EKS API endpoint"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
 variable "tags" {
   type    = map(string)
   default = {}

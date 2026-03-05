@@ -42,11 +42,11 @@ resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.this.id
   cidr_block              = cidrsubnet(var.vpc_cidr, 8, count.index)
   availability_zone       = var.availability_zones[count.index]
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = true #tfsec:ignore:aws-ec2-no-public-ip-subnet -- public subnets require public IPs for NAT/ALB
 
   tags = merge(var.tags, {
-    Name                                = "${local.name_prefix}-public-${var.availability_zones[count.index]}"
-    "kubernetes.io/role/elb"            = "1"
+    Name                                         = "${local.name_prefix}-public-${var.availability_zones[count.index]}"
+    "kubernetes.io/role/elb"                     = "1"
     "kubernetes.io/cluster/${local.name_prefix}" = "shared"
   })
 }
@@ -60,8 +60,8 @@ resource "aws_subnet" "private" {
 
   tags = merge(var.tags, {
     Name                                         = "${local.name_prefix}-private-${var.availability_zones[count.index]}"
-    "kubernetes.io/role/internal-elb"             = "1"
-    "kubernetes.io/cluster/${local.name_prefix}"  = "shared"
+    "kubernetes.io/role/internal-elb"            = "1"
+    "kubernetes.io/cluster/${local.name_prefix}" = "shared"
   })
 }
 
@@ -211,7 +211,7 @@ resource "aws_iam_role" "flow_logs" {
   tags = var.tags
 }
 
-resource "aws_iam_role_policy" "flow_logs" {
+resource "aws_iam_role_policy" "flow_logs" { #tfsec:ignore:aws-iam-no-policy-wildcards scoped to specific log group
   name = "flow-logs-policy"
   role = aws_iam_role.flow_logs.id
 
@@ -219,14 +219,13 @@ resource "aws_iam_role_policy" "flow_logs" {
     Version = "2012-10-17"
     Statement = [{
       Action = [
-        "logs:CreateLogGroup",
         "logs:CreateLogStream",
         "logs:PutLogEvents",
         "logs:DescribeLogGroups",
         "logs:DescribeLogStreams"
       ]
       Effect   = "Allow"
-      Resource = "*"
+      Resource = "${aws_cloudwatch_log_group.flow_logs.arn}:*"
     }]
   })
 }

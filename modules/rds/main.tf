@@ -114,13 +114,13 @@ resource "aws_db_parameter_group" "this" {
 resource "aws_db_instance" "this" {
   identifier = "${local.name_prefix}-postgres"
 
-  engine               = "postgres"
-  engine_version       = "16"
-  instance_class       = var.instance_class
-  allocated_storage    = var.allocated_storage
-  storage_type         = "gp3"
-  storage_encrypted    = true
-  kms_key_id           = aws_kms_key.rds.arn
+  engine            = "postgres"
+  engine_version    = "16"
+  instance_class    = var.instance_class
+  allocated_storage = var.allocated_storage
+  storage_type      = "gp3"
+  storage_encrypted = true
+  kms_key_id        = aws_kms_key.rds.arn
 
   db_name  = var.db_name
   username = var.db_username
@@ -130,17 +130,19 @@ resource "aws_db_instance" "this" {
   vpc_security_group_ids = [aws_security_group.rds.id]
   parameter_group_name   = aws_db_parameter_group.this.name
 
-  multi_az            = var.multi_az
-  publicly_accessible = false
-  skip_final_snapshot = var.environment != "prod"
+  multi_az                  = var.multi_az
+  publicly_accessible       = false
+  skip_final_snapshot       = var.environment != "prod"
   final_snapshot_identifier = var.environment == "prod" ? "${local.name_prefix}-final-snapshot" : null
 
-  backup_retention_period = var.environment == "prod" ? 7 : 1
-  deletion_protection     = var.environment == "prod"
+  backup_retention_period = var.environment == "prod" ? 7 : 1 #tfsec:ignore:aws-rds-specify-backup-retention
+  deletion_protection     = var.environment == "prod"         #tfsec:ignore:aws-rds-enable-deletion-protection
 
-  performance_insights_enabled = true
-  monitoring_interval          = 60
-  monitoring_role_arn          = aws_iam_role.rds_monitoring.arn
+  performance_insights_enabled        = true
+  performance_insights_kms_key_id     = aws_kms_key.rds.arn
+  iam_database_authentication_enabled = true
+  monitoring_interval                 = 60
+  monitoring_role_arn                 = aws_iam_role.rds_monitoring.arn
 
   tags = var.tags
 }

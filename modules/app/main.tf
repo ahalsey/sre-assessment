@@ -113,8 +113,8 @@ resource "kubernetes_deployment" "app" {
           }
 
           security_context {
-            read_only_root_filesystem = false # nginx needs /tmp
-            run_as_non_root           = false # nginx default image runs as root; override in prod
+            read_only_root_filesystem  = false # nginx needs /tmp
+            run_as_non_root            = false # nginx default image runs as root; override in prod
             allow_privilege_escalation = false
           }
         }

@@ -49,6 +49,7 @@ module "eks" {
   node_min_size         = var.eks_node_min_size
   node_max_size         = var.eks_node_max_size
   node_disk_size        = var.eks_node_disk_size
+  vpc_cidr              = module.vpc.vpc_cidr
 
   tags = local.common_tags
 }

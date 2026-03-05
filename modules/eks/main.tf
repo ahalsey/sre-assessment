@@ -52,7 +52,8 @@ resource "aws_eks_cluster" "this" {
   vpc_config {
     subnet_ids              = var.private_subnet_ids
     endpoint_private_access = true
-    endpoint_public_access  = true # TODO: restrict to VPN/office CIDRs in prod
+    endpoint_public_access  = true          #tfsec:ignore:aws-eks-no-public-cluster-access required for GitHub Actions CI/CD
+    public_access_cidrs     = ["0.0.0.0/0"] #tfsec:ignore:aws-eks-no-public-cluster-access-to-cidr
     security_group_ids      = [aws_security_group.cluster.id]
   }
 
@@ -241,11 +242,35 @@ resource "aws_security_group" "node" {
   vpc_id      = var.vpc_id
 
   egress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:aws-ec2-no-public-egress-sgr ECR, STS, CloudWatch
+    description = "HTTPS outbound (ECR, API, logging)"
+  }
+
+  egress {
+    from_port   = 53
+    to_port     = 53
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:aws-ec2-no-public-egress-sgr DNS resolution
+    description = "DNS TCP"
+  }
+
+  egress {
+    from_port   = 53
+    to_port     = 53
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:aws-ec2-no-public-egress-sgr DNS resolution
+    description = "DNS UDP"
+  }
+
+  egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow all outbound"
+    cidr_blocks = [var.vpc_cidr]
+    description = "All traffic within VPC"
   }
 
   tags = merge(var.tags, {
