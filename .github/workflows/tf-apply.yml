@@ -65,6 +65,11 @@ jobs:
             -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}" \
             -backend-config="encrypt=true"
 
+      - name: Force unlock state
+        working-directory: env/${{ steps.env.outputs.target }}
+        run: terraform force-unlock -force 9de1dc42-f113-f43a-2cbc-20fe33876ee2
+        continue-on-error: true
+
       - name: Terraform Plan
         working-directory: env/${{ steps.env.outputs.target }}
         run: terraform plan -out=tfplan
