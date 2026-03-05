@@ -7,8 +7,3 @@ output "namespace" {
   description = "Kubernetes namespace for the application"
   value       = kubernetes_namespace.app.metadata[0].name
 }
-
-output "lb_controller_ready" {
-  description = "Indicates the LB controller is installed"
-  value       = helm_release.lb_controller.status
-}

@@ -73,7 +73,7 @@ module "rds" {
 
   tags = local.common_tags
 
-  depends_on = [module.eks, module.rds]
+  depends_on = [module.eks]
 }
 
 # Demo Application
