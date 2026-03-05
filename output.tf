@@ -35,10 +35,6 @@ output "app_service_url" {
   value       = module.app.service_url
 }
 
-output "eks_cluster_endpoint" {
-  value = module.eks.cluster_endpoint
-}
-
 output "eks_cluster_ca_certificate" {
   value = module.eks.cluster_ca_certificate
 }
