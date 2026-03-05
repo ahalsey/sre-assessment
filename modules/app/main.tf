@@ -152,3 +152,86 @@ resource "kubernetes_service" "app" {
     }
   }
 }
+
+# ---------------------------------------------------------------------------
+# AWS Load Balancer Controller
+# ---------------------------------------------------------------------------
+resource "aws_iam_policy" "lb_controller" {
+  name   = "${local.cluster_name}-lb-controller"
+  policy = file("${path.module}/lb-controller-policy.json")
+
+  tags = var.tags
+}
+
+resource "aws_iam_role" "lb_controller" {
+  name = "${local.cluster_name}-lb-controller"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Federated = aws_iam_openid_connect_provider.eks.arn
+      }
+      Action = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "${replace(aws_eks_cluster.this.identity[0].oidc[0].issuer, "https://", "")}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
+          "${replace(aws_eks_cluster.this.identity[0].oidc[0].issuer, "https://", "")}:aud" = "sts.amazonaws.com"
+        }
+      }
+    }]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "lb_controller" {
+  role       = aws_iam_role.lb_controller.name
+  policy_arn = aws_iam_policy.lb_controller.arn
+}
+
+resource "helm_release" "lb_controller" {
+  name       = "aws-load-balancer-controller"
+  namespace  = "kube-system"
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-load-balancer-controller"
+  version    = "1.7.1"
+
+  set {
+    name  = "clusterName"
+    value = aws_eks_cluster.this.name
+  }
+
+  set {
+    name  = "serviceAccount.create"
+    value = "true"
+  }
+
+  set {
+    name  = "serviceAccount.name"
+    value = "aws-load-balancer-controller"
+  }
+
+  set {
+    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = aws_iam_role.lb_controller.arn
+  }
+
+  set {
+    name  = "region"
+    value = data.aws_region.current.name
+  }
+
+  set {
+    name  = "vpcId"
+    value = var.vpc_id
+  }
+
+  depends_on = [
+    aws_eks_node_group.default,
+    aws_iam_role_policy_attachment.lb_controller,
+  ]
+}
+
+data "aws_region" "current" {}
