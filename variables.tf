@@ -132,3 +132,8 @@ variable "alert_email" {
   type        = string
   default     = ""
 }
+
+variable "install_lb_controller" {
+  type    = bool
+  default = false
+}
