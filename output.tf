@@ -34,3 +34,11 @@ output "app_service_url" {
   description = "URL to reach the demo application (after LB provisioning)"
   value       = module.app.service_url
 }
+
+output "eks_cluster_endpoint" {
+  value = module.eks.cluster_endpoint
+}
+
+output "eks_cluster_ca_certificate" {
+  value = module.eks.cluster_ca_certificate
+}
