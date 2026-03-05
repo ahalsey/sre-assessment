@@ -5,5 +5,5 @@ output "sns_topic_arn" {
 
 output "log_group_name" {
   description = "CloudWatch log group for cluster logs"
-  value       = aws_cloudwatch_log_group.eks.name
+  value       = data.aws_cloudwatch_log_group.eks.name
 }
