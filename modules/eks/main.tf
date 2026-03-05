@@ -363,4 +363,10 @@ resource "helm_release" "lb_controller" {
   ]
 }
 
+resource "aws_eks_access_entry" "node" {
+  cluster_name  = aws_eks_cluster.this.name
+  principal_arn = aws_iam_role.node_group.arn
+  type          = "EC2_LINUX"
+}
+
 data "aws_region" "current" {}
