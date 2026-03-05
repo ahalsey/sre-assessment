@@ -30,9 +30,6 @@ resource "aws_secretsmanager_secret_version" "db" {
   secret_string = jsonencode({
     username = var.db_username
     password = random_password.db.result
-    host     = aws_db_instance.this.address
-    port     = aws_db_instance.this.port
-    dbname   = var.db_name
   })
 }
 
