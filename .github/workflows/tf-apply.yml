@@ -63,6 +63,11 @@ jobs:
             -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}" \
             -backend-config="encrypt=true"
 
+      - name: Remove LB controller from state
+        working-directory: environments/${{ steps.env.outputs.target }}
+        run: terraform state rm 'module.platform.module.eks.helm_release.lb_controller' || true
+        continue-on-error: true
+
       - name: Apply Infrastructure
         working-directory: env/${{ steps.env.outputs.target }}
         run: |
