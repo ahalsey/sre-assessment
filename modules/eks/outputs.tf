@@ -35,5 +35,5 @@ output "node_role_arn" {
 
 output "lb_controller_ready" {
   description = "Indicates the LB controller is installed"
-  value       = helm_release.lb_controller.status
+  value       = var.install_lb_controller ? helm_release.lb_controller[0].status : null
 }
