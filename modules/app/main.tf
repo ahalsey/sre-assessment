@@ -124,7 +124,7 @@ resource "kubernetes_deployment" "app" {
 }
 
 # ---------------------------------------------------------------------------
-# Service — LoadBalancer (provisions an AWS CLB/NLB)
+# Service — LoadBalancer
 # ---------------------------------------------------------------------------
 resource "kubernetes_service" "app" {
   metadata {
@@ -139,7 +139,7 @@ resource "kubernetes_service" "app" {
   }
 
   spec {
-    type = "ClusterIP"
+    type = "LoadBalancer"
 
     selector = {
       app = var.project_name
