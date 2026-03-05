@@ -56,7 +56,7 @@ jobs:
           echo "target=$ENV" >> "$GITHUB_OUTPUT"
 
       - name: Terraform Init
-        working-directory: environments/${{ steps.env.outputs.target }}
+        working-directory: env/${{ steps.env.outputs.target }}
         run: |
           terraform init \
             -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
@@ -66,9 +66,9 @@ jobs:
             -backend-config="encrypt=true"
 
       - name: Terraform Plan
-        working-directory: environments/${{ steps.env.outputs.target }}
+        working-directory: env/${{ steps.env.outputs.target }}
         run: terraform plan -out=tfplan
 
       - name: Terraform Apply
-        working-directory: environments/${{ steps.env.outputs.target }}
+        working-directory: env/${{ steps.env.outputs.target }}
         run: terraform apply -auto-approve tfplan
