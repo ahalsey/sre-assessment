@@ -26,6 +26,12 @@ provider "aws" {
 module "platform" {
   source = "../../"
 
+  providers = {
+    aws        = aws
+    kubernetes = kubernetes
+    helm       = helm
+  }
+
   project_name       = "platform-sre-demo"
   environment        = "dev"
   aws_region         = var.aws_region
@@ -69,20 +75,24 @@ output "app_url" {
   value = module.platform.app_service_url
 }
 
+data "aws_eks_cluster" "this" {
+  name = module.platform.eks_cluster_name
+}
+
 data "aws_eks_cluster_auth" "this" {
   name = module.platform.eks_cluster_name
 }
 
 provider "kubernetes" {
   host                   = module.platform.eks_cluster_endpoint
-  cluster_ca_certificate = base64decode(module.platform.eks_cluster_ca_certificate)
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
   token                  = data.aws_eks_cluster_auth.this.token
 }
 
 provider "helm" {
   kubernetes {
     host                   = module.platform.eks_cluster_endpoint
-    cluster_ca_certificate = base64decode(module.platform.eks_cluster_ca_certificate)
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
     token                  = data.aws_eks_cluster_auth.this.token
   }
 }
