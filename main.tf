@@ -72,6 +72,8 @@ module "rds" {
   multi_az          = var.rds_multi_az
 
   tags = local.common_tags
+
+  depends_on = [module.eks, module.rds]
 }
 
 # Demo Application
