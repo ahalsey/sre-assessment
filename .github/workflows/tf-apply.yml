@@ -32,7 +32,7 @@ env:
   AWS_REGION: "us-east-1"
 
 jobs:
-  apply:
+  apply-infra:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment || 'dev' }}
 
@@ -51,9 +51,7 @@ jobs:
 
       - name: Set environment
         id: env
-        run: |
-          ENV="${{ github.event.inputs.environment || 'dev' }}"
-          echo "target=$ENV" >> "$GITHUB_OUTPUT"
+        run: echo "target=${{ github.event.inputs.environment || 'dev' }}" >> "$GITHUB_OUTPUT"
 
       - name: Terraform Init
         working-directory: env/${{ steps.env.outputs.target }}
@@ -65,15 +63,50 @@ jobs:
             -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}" \
             -backend-config="encrypt=true"
 
-      - name: Force unlock state
+      - name: Apply Infrastructure
         working-directory: env/${{ steps.env.outputs.target }}
-        run: terraform force-unlock -force 9de1dc42-f113-f43a-2cbc-20fe33876ee2
-        continue-on-error: true
+        run: |
+          terraform plan -target=module.platform.module.vpc \
+                         -target=module.platform.module.eks \
+                         -target=module.platform.module.rds \
+                         -target=module.platform.module.observability \
+                         -out=tfplan
+          terraform apply -auto-approve tfplan
 
-      - name: Terraform Plan
-        working-directory: env/${{ steps.env.outputs.target }}
-        run: terraform plan -out=tfplan
+  apply-app:
+    needs: apply-infra
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'dev' }}
 
-      - name: Terraform Apply
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set environment
+        id: env
+        run: echo "target=${{ github.event.inputs.environment || 'dev' }}" >> "$GITHUB_OUTPUT"
+
+      - name: Terraform Init
         working-directory: env/${{ steps.env.outputs.target }}
-        run: terraform apply -auto-approve tfplan
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=${{ steps.env.outputs.target }}/terraform.tfstate" \
+            -backend-config="region=${{ env.AWS_REGION }}" \
+            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}" \
+            -backend-config="encrypt=true"
+
+      - name: Apply App
+        working-directory: env/${{ steps.env.outputs.target }}
+        run: |
+          terraform plan -target=module.platform.module.app -out=tfplan
+          terraform apply -auto-approve tfplan
