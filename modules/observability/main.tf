@@ -9,14 +9,10 @@ locals {
   name_prefix = "${var.project_name}-${var.environment}"
 }
 
-# ---------------------------------------------------------------------------
 # CloudWatch Log Group for EKS cluster logs
-# ---------------------------------------------------------------------------
-resource "aws_cloudwatch_log_group" "eks" {
-  name              = "/aws/eks/${var.cluster_name}/cluster"
-  retention_in_days = var.log_retention_days
 
-  tags = var.tags
+data "aws_cloudwatch_log_group" "eks" {
+  name = "/aws/eks/${var.cluster_name}/cluster"
 }
 
 # KMS key for SNS topic encryption
@@ -27,9 +23,7 @@ resource "aws_kms_key" "sns" {
   tags                    = var.tags
 }
 
-# ---------------------------------------------------------------------------
 # SNS Topic for alerts
-# ---------------------------------------------------------------------------
 
 resource "aws_sns_topic" "alerts" {
   name              = "${local.name_prefix}-alerts"
@@ -46,9 +40,7 @@ resource "aws_sns_topic_subscription" "email" {
   endpoint  = var.sns_alert_email
 }
 
-# ---------------------------------------------------------------------------
-# CloudWatch Alarms
-# ---------------------------------------------------------------------------
+# CloudWatch alarms
 
 # High CPU on EKS nodes
 resource "aws_cloudwatch_metric_alarm" "node_cpu_high" {
