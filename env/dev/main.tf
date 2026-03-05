@@ -26,12 +26,6 @@ provider "aws" {
 module "platform" {
   source = "../../"
 
-  providers = {
-    aws        = aws
-    kubernetes = kubernetes
-    helm       = helm
-  }
-
   project_name       = "platform-sre-demo"
   environment        = "dev"
   aws_region         = var.aws_region
