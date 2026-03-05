@@ -32,3 +32,8 @@ output "node_role_arn" {
   description = "IAM role ARN of the node group"
   value       = aws_iam_role.node_group.arn
 }
+
+output "lb_controller_ready" {
+  description = "Indicates the LB controller is installed"
+  value       = helm_release.lb_controller.status
+}
