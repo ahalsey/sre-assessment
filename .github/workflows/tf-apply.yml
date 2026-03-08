@@ -16,12 +16,6 @@ on:
         type: choice
         options:
           - dev
-          - prod
-      auto_approve:
-        description: "Skip approval (dev only)"
-        required: false
-        type: boolean
-        default: false
 
 permissions:
   contents: read
@@ -32,7 +26,7 @@ env:
   AWS_REGION: "us-east-1"
 
 jobs:
-  apply-infra:
+  apply:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment || 'dev' }}
 
@@ -63,55 +57,11 @@ jobs:
             -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}" \
             -backend-config="encrypt=true"
 
-      - name: Remove LB controller from state
-        working-directory: environments/${{ steps.env.outputs.target }}
-        run: terraform state rm 'module.platform.module.eks.helm_release.lb_controller' || true
-        continue-on-error: true
-
-      - name: Apply Infrastructure
+      - name: Terraform Plan
         working-directory: env/${{ steps.env.outputs.target }}
-        run: |
-          terraform plan -target=module.platform.module.vpc \
-                         -target=module.platform.module.eks \
-                         -target=module.platform.module.rds \
-                         -target=module.platform.module.observability \
-                         -out=tfplan
-          terraform apply -auto-approve tfplan
+        run: terraform plan -out=tfplan
 
-  apply-app:
-    needs: apply-infra
-    runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment || 'dev' }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ env.TF_VERSION }}
-
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Set environment
-        id: env
-        run: echo "target=${{ github.event.inputs.environment || 'dev' }}" >> "$GITHUB_OUTPUT"
-
-      - name: Terraform Init
+      - name: Terraform Apply
         working-directory: env/${{ steps.env.outputs.target }}
-        run: |
-          terraform init \
-            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
-            -backend-config="key=${{ steps.env.outputs.target }}/terraform.tfstate" \
-            -backend-config="region=${{ env.AWS_REGION }}" \
-            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}" \
-            -backend-config="encrypt=true"
-
-      - name: Apply App
-        working-directory: env/${{ steps.env.outputs.target }}
-        run: |
-          terraform plan -target=module.platform.module.app -out=tfplan
-          terraform apply -auto-approve tfplan
+        run: terraform apply -auto-approve tfplan
+        
