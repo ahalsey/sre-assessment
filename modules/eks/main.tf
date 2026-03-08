@@ -168,7 +168,8 @@ resource "aws_eks_node_group" "default" {
 
   instance_types = var.node_instance_types
   disk_size      = var.node_disk_size
-  capacity_type  = "ON_DEMAND" # Switch to SPOT for further cost savings
+  capacity_type  = "ON_DEMAND"
+  ami_type       = "AL2023_x86_64_STANDARD"
 
   scaling_config {
     desired_size = var.node_desired_capacity
