@@ -26,6 +26,8 @@ provider "aws" {
 module "platform" {
   source = "../../"
 
+  install_lb_controller = false
+
 
   project_name       = "platform-sre-demo"
   environment        = "dev"
@@ -70,13 +72,13 @@ output "app_url" {
   value = module.platform.app_service_url
 }
 
-data "aws_eks_cluster" "this" {
-  name = "platform-sre-demo-dev-eks"
-}
+#data "aws_eks_cluster" "this" {
+#  name = "platform-sre-demo-dev-eks"
+#}
 
-data "aws_eks_cluster_auth" "this" {
-  name = "platform-sre-demo-dev-eks"
-}
+#data "aws_eks_cluster_auth" "this" {
+#  name = "platform-sre-demo-dev-eks"
+#}
 
 provider "kubernetes" {
   host                   = module.platform.eks_cluster_endpoint
