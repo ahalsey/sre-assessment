@@ -57,6 +57,11 @@ jobs:
             -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}" \
             -backend-config="encrypt=true"
 
+      - name: Import existing node group
+        working-directory: env/${{ steps.env.outputs.target }}
+        run: terraform import 'module.platform.module.eks.aws_eks_node_group.default' platform-sre-demo-dev-eks:platform-sre-demo-dev-eks-default || true
+        continue-on-error: true
+
       - name: Terraform Plan
         working-directory: env/${{ steps.env.outputs.target }}
         run: terraform plan -lock=false -out=tfplan
