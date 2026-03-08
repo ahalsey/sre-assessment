@@ -26,8 +26,7 @@ provider "aws" {
 module "platform" {
   source = "../../"
 
-  install_lb_controller = false
-
+  install_lb_controller = true
 
   project_name       = "platform-sre-demo"
   environment        = "dev"
@@ -37,7 +36,7 @@ module "platform" {
   single_nat_gateway = true # Cost saving
 
   # EKS — minimal for dev
-  eks_cluster_version       = "1.29"
+  eks_cluster_version       = "1.30"
   eks_node_instance_types   = ["t3.medium"]
   eks_node_desired_capacity = 2
   eks_node_min_size         = 1
@@ -72,24 +71,24 @@ output "app_url" {
   value = module.platform.app_service_url
 }
 
-#data "aws_eks_cluster" "this" {
-#  name = "platform-sre-demo-dev-eks"
-#}
+data "aws_eks_cluster" "this" {
+  name = "platform-sre-demo-dev-eks"
+}
 
-#data "aws_eks_cluster_auth" "this" {
-#  name = "platform-sre-demo-dev-eks"
-#}
+data "aws_eks_cluster_auth" "this" {
+  name = "platform-sre-demo-dev-eks"
+}
 
-#provider "kubernetes" {
-#  host                   = module.platform.eks_cluster_endpoint
-#  cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
-#  token                  = data.aws_eks_cluster_auth.this.token
-#}
+provider "kubernetes" {
+  host                   = module.platform.eks_cluster_endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.this.token
+}
 
-#provider "helm" {
-#  kubernetes {
-#    host                   = module.platform.eks_cluster_endpoint
-#    cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
-#    token                  = data.aws_eks_cluster_auth.this.token
-#  }
-#}
+provider "helm" {
+  kubernetes {
+    host                   = module.platform.eks_cluster_endpoint
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
+    token                  = data.aws_eks_cluster_auth.this.token
+  }
+}
