@@ -96,7 +96,7 @@ resource "aws_kms_key" "eks" {
 }
 
 resource "aws_kms_alias" "eks" {
-  name          = "alias/${local.cluster_name}-secrets"
+  name          = "alias/${local.cluster_name}-kms"
   target_key_id = aws_kms_key.eks.key_id
 }
 
