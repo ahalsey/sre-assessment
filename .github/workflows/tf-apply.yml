@@ -59,9 +59,8 @@ jobs:
 
       - name: Terraform Plan
         working-directory: env/${{ steps.env.outputs.target }}
-        run: terraform plan -out=tfplan
+        run: terraform plan -lock=false -out=tfplan
 
       - name: Terraform Apply
         working-directory: env/${{ steps.env.outputs.target }}
-        run: terraform apply -auto-approve tfplan
-        
+        run: terraform apply -lock=false -auto-approve tfplan
