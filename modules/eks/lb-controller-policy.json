@@ -28,6 +28,7 @@
                 "ec2:DescribeNetworkInterfaces",
                 "ec2:DescribeTags",
                 "ec2:GetCoipPoolUsage",
+                "ec2:GetSecurityGroupsForVpc",
                 "ec2:DescribeCoipPools",
                 "elasticloadbalancing:DescribeLoadBalancers",
                 "elasticloadbalancing:DescribeLoadBalancerAttributes",
