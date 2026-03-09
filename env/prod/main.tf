@@ -36,7 +36,7 @@ module "platform" {
   single_nat_gateway = false # HA in prod
 
   # EKS
-  eks_cluster_version       = "1.34"
+  eks_cluster_version       = "1.35"
   eks_node_instance_types   = ["t3.large"]
   eks_node_desired_capacity = 3
   eks_node_min_size         = 2

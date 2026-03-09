@@ -6,7 +6,7 @@ This repository provisions a production-ready AWS EKS platform using Terraform, 
 
 ## LLM Usage:
 
-Claude Opus 4.6 was used for drafting the below architecture diagram, generating `bootstrap-backend.sh`, and general troubleshooting.
+Claude Opus 4.6 was used for drafting the below architecture diagram, generating `bootstrap-backend.sh`, the GitHub Workflow, and general connectivity troubleshooting.
 
 ---
 
@@ -26,7 +26,7 @@ Claude Opus 4.6 was used for drafting the below architecture diagram, generating
 │  │          │                                                 │  │
 │  │   Private Subnets (AZ-a, AZ-b)                             │  │
 │  │   ┌──────────────────────────────────────────────┐         │  │
-│  │   │           EKS Cluster (v1.33)                │         │  │
+│  │   │           EKS Cluster (v1.35)                │         │  │
 │  │   │                                              │         │  │
 │  │   │  ┌─────────┐  ┌─────────┐  ┌─────────────┐   │         │  │
 │  │   │  │ adminer │  │ adminer │  │LB Controller│   │         │  │
