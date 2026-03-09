@@ -112,7 +112,7 @@ variable "app_namespace" {
 variable "app_container_image" {
   description = "Container image for the demo application"
   type        = string
-  default     = "nginx:1.25-alpine"
+  default     = "containous/whoami"
 }
 
 variable "app_container_port" {
@@ -137,4 +137,3 @@ variable "install_lb_controller" {
   type    = bool
   default = false
 }
-
