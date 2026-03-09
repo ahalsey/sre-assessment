@@ -26,9 +26,10 @@ resource "kubernetes_config_map" "app" {
   }
 
   data = {
-    DB_HOST = var.db_host
-    DB_PORT = tostring(var.db_port)
-    DB_NAME = var.db_name
+    DB_HOST                = var.db_host
+    DB_PORT                = tostring(var.db_port)
+    DB_NAME                = var.db_name
+    ADMINER_DEFAULT_SERVER = var.db_host
   }
 }
 

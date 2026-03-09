@@ -13,12 +13,12 @@ variable "namespace" {
 
 variable "container_image" {
   type    = string
-  default = "nginx:1.25-alpine"
+  default = "adminer"
 }
 
 variable "container_port" {
   type    = number
-  default = 80
+  default = 8080
 }
 
 variable "replicas" {
