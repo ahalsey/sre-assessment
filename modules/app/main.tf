@@ -139,7 +139,8 @@ resource "kubernetes_service" "app" {
   }
 
   spec {
-    type = "LoadBalancer"
+    # Upgrade to LoadBalancer with AWS LB Controller for production ingress
+    type = "ClusterIP"
 
     selector = {
       app = var.project_name
