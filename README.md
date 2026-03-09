@@ -189,12 +189,12 @@ This demo is sized for minimal cost:
 
 The demo deploys an **adminer** container as a Kubernetes Deployment with:
 
-- 2 replicas for basic availability
+- 2 replicas
 - Resource requests/limits (50m–200m CPU, 64Mi–128Mi memory)
 - Liveness and readiness probes
 - Prometheus scrape annotations
 - Database connection details injected via ConfigMap
-- ClusterIP service (accessible via `kubectl port-forward`)
+- LoadBalancer service
 
 ### Verifying the Application
 
