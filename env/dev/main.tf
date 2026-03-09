@@ -49,7 +49,7 @@ module "platform" {
   rds_multi_az          = false
 
   # App
-  app_replicas = 1
+  app_replicas = 2
 
   # Observability
   alert_email = var.alert_email
