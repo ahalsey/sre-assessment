@@ -64,7 +64,7 @@ module "rds" {
   environment                = var.environment
   vpc_id                     = module.vpc.vpc_id
   database_subnet_ids        = module.vpc.database_subnet_ids
-  allowed_security_group_ids = [module.eks.node_security_group_id]
+  allowed_security_group_ids = [module.eks.node_security_group_id, module.eks.cluster_security_group_id]
 
   instance_class    = var.rds_instance_class
   allocated_storage = var.rds_allocated_storage
