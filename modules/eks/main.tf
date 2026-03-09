@@ -117,6 +117,16 @@ resource "aws_security_group" "cluster" {
   }
 }
 
+resource "aws_security_group_rule" "cluster_kubelet" {
+  type                     = "ingress"
+  from_port                = 10250
+  to_port                  = 10250
+  protocol                 = "tcp"
+  security_group_id        = aws_eks_cluster.this.vpc_config[0].cluster_security_group_id
+  source_security_group_id = aws_eks_cluster.this.vpc_config[0].cluster_security_group_id
+  description              = "Kubelet API control plane to nodes"
+}
+
 # ---------------------------------------------------------------------------
 # Node Group IAM Role
 # ---------------------------------------------------------------------------
