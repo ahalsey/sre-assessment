@@ -37,3 +37,8 @@ output "lb_controller_ready" {
   description = "Indicates the LB controller is installed"
   value       = var.install_lb_controller ? helm_release.lb_controller[0].status : null
 }
+
+output "cluster_security_group_id" {
+  description = "EKS-managed cluster security group ID"
+  value       = aws_eks_cluster.this.vpc_config[0].cluster_security_group_id
+}
