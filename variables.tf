@@ -112,13 +112,13 @@ variable "app_namespace" {
 variable "app_container_image" {
   description = "Container image for the demo application"
   type        = string
-  default     = "containous/whoami"
+  default     = "adminer"
 }
 
 variable "app_container_port" {
   description = "Port the application container listens on"
   type        = number
-  default     = 80
+  default     = 8080
 }
 
 variable "app_replicas" {
