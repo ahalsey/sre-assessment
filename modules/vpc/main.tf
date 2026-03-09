@@ -45,8 +45,8 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true #tfsec:ignore:aws-ec2-no-public-ip-subnet -- public subnets require public IPs for NAT/ALB
 
   tags = merge(var.tags, {
-    Name                                         = "${local.name_prefix}-public-${var.availability_zones[count.index]}"
-    "kubernetes.io/role/elb"                     = "1"
+    Name                                             = "${local.name_prefix}-public-${var.availability_zones[count.index]}"
+    "kubernetes.io/role/elb"                         = "1"
     "kubernetes.io/cluster/${local.name_prefix}-eks" = "shared"
   })
 }
@@ -59,8 +59,8 @@ resource "aws_subnet" "private" {
   availability_zone = var.availability_zones[count.index]
 
   tags = merge(var.tags, {
-    Name                                         = "${local.name_prefix}-private-${var.availability_zones[count.index]}"
-    "kubernetes.io/role/internal-elb"            = "1"
+    Name                                             = "${local.name_prefix}-private-${var.availability_zones[count.index]}"
+    "kubernetes.io/role/internal-elb"                = "1"
     "kubernetes.io/cluster/${local.name_prefix}-eks" = "shared"
   })
 }
