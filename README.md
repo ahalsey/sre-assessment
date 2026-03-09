@@ -26,7 +26,7 @@ Claude Opus 4.6 was used for drafting the below architecture diagram, generating
 │  │          │                                                 │  │
 │  │   Private Subnets (AZ-a, AZ-b)                             │  │
 │  │   ┌──────────────────────────────────────────────┐         │  │
-│  │   │           EKS Cluster (v1.34)                │         │  │
+│  │   │           EKS Cluster (v1.35)                │         │  │
 │  │   │                                              │         │  │
 │  │   │  ┌─────────┐  ┌─────────┐  ┌─────────────┐   │         │  │
 │  │   │  │ adminer │  │ adminer │  │LB Controller│   │         │  │
