@@ -139,7 +139,7 @@ resource "kubernetes_service" "app" {
   }
 
   spec {
-    type = "ClusterIP"
+    type = "LoadBalancer"
 
     selector = {
       app = var.project_name
