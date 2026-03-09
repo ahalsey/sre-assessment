@@ -133,15 +133,15 @@ resource "kubernetes_service" "app" {
     namespace = kubernetes_namespace.app.metadata[0].name
 
     annotations = {
-      # Use NLB for better performance / static IPs
-      "service.beta.kubernetes.io/aws-load-balancer-type"   = "nlb"
-      "service.beta.kubernetes.io/aws-load-balancer-scheme" = "internet-facing"
+      "service.beta.kubernetes.io/aws-load-balancer-type"            = "external"
+      "service.beta.kubernetes.io/aws-load-balancer-nlb-target-type" = "ip"
+      "service.beta.kubernetes.io/aws-load-balancer-scheme"          = "internet-facing"
     }
   }
 
   spec {
     # Upgrade to LoadBalancer with AWS LB Controller for production ingress
-    type = "ClusterIP"
+    type = "LoadBalancer"
 
     selector = {
       app = var.project_name
